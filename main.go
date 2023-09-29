@@ -8,71 +8,103 @@ import (
 	"strings"
 )
 
+var (
+	romans = []string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"}
+)
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Введите выражение:")
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSpace(strings.ReplaceAll(input, " ", ""))
 
-	num1, operator, num2, err := parseInput(input)
+	nums, operator, err := parseInput(input)
 	if err != nil {
 		fmt.Println("Ошибка:", err)
 		return
 	}
 
-	res, err := calculate(num1, operator, num2)
+	res, err := parseSystemCount(nums, operator)
 	if err != nil {
 		fmt.Println("Ошибка:", err)
 		return
 	}
 	fmt.Println("Результат:", res)
+
 }
 
-func parseInput(input string) (int, string, int, error) {
+func parseInput(input string) ([]string, string, error) {
 	operators := []string{"+", "-", "*", "/"}
 	for _, operator := range operators {
 		if strings.Contains(input, operator) {
 			nums := strings.Split(input, operator)
-			num1, err := parseNum(nums[0])
-			if err != nil {
-				return 0, "", 0, err
-			}
-
-			num2, err := parseNum(nums[1])
-			if err != nil {
-				return 0, "", 0, err
-			}
-			return num1, operator, num2, nil
+			return nums, operator, nil
 		}
 	}
-	return 0, "", 0, fmt.Errorf("неккорректное выражение")
+	return []string{}, "", fmt.Errorf("некорректное выражение")
 }
 
-func parseNum(numStr string) (int, error) {
-	romans := []string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"}
+func parseSystemCount(nums []string, operator string) (string, error) {
+	var res string
+	var err error
+	var q int
+	for _, num := range nums {
+		for _, roman := range romans {
+			if num == roman {
+				q += 1
+			}
+		}
+	}
+	switch q {
+	case 0:
+		num1, err := parseArabNum(nums[0])
+		if err != nil {
+			return "", err
+		}
+		num2, err := parseArabNum(nums[1])
+		if err != nil {
+			return "", err
+		}
+		res, err = arabCalc(num1, num2, operator)
+		if err != nil {
+			return "", err
+		}
+	case 1:
+		return "", fmt.Errorf("числа должны быть из одной системы счисления")
+	case 2:
+		num1 := parseRomanNum(nums[0])
+		num2 := parseRomanNum(nums[1])
+		res, err = RomanCalc(num1, num2, operator)
+		if err != nil {
+			return "", err
+		}
+	}
+	return res, nil
+}
+
+func parseArabNum(numStr string) (int, error) {
+	num, err := strconv.Atoi(numStr)
+	if err != nil {
+		return 0, fmt.Errorf("некорректное число: %s", numStr)
+	}
+	if num < 1 || num > 10 {
+		return 0, fmt.Errorf("число должно быть от 1 до 10")
+
+	}
+	return num, nil
+}
+
+func parseRomanNum(numStr string) int {
+	var num int
 	for indx, roman := range romans {
 		if strings.Contains(numStr, roman) {
-			num := indx + 1
-			if num < 1 || num > 10 {
-				return 0, fmt.Errorf("число должно быть от 1 до 10")
-			}
-			return num, nil
-		} else {
-			num, err := strconv.Atoi(numStr)
-			if err != nil {
-				return 0, fmt.Errorf("неккорректное число: %s", numStr)
-			}
-
-			if num < 1 || num > 10 {
-				return 0, fmt.Errorf("число должно быть от 1 до 10")
-			}
-			return num, nil
+			num = indx + 1
 		}
 	}
-	return 0, fmt.Errorf("неккорректное число: %s", numStr)
+	return num
 }
 
-func calculate(num1 int, operator string, num2 int) (int, error) {
+func arabCalc(num1 int, num2 int, operator string) (string, error) {
 	var res int
 	switch operator {
 	case "+":
@@ -84,7 +116,28 @@ func calculate(num1 int, operator string, num2 int) (int, error) {
 	case "/":
 		res = num1 * num2
 	default:
-		return 0, fmt.Errorf("неккорректный оператор: %s", operator)
+		return "", fmt.Errorf("неккорректный оператор: %s", operator)
 	}
-	return res, nil
+	return strconv.Itoa(res), nil
+}
+
+func RomanCalc(num1 int, num2 int, operator string) (string, error) {
+	var res int
+	switch operator {
+	case "+":
+		res = num1 + num2
+	case "-":
+		if num1 > num2 {
+			res = num1 - num2
+		} else {
+			return "", fmt.Errorf("в римской системе счисления отсутсвует ноль и отрицательные числа")
+		}
+	case "*":
+		res = num1 * num2
+	case "/":
+		res = num1 * num2
+	default:
+		return "", fmt.Errorf("неккорректный оператор: %s", operator)
+	}
+	return romans[res-1], nil
 }
