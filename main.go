@@ -38,10 +38,15 @@ func parseInput(input string) ([]string, string, error) {
 	for _, operator := range operators {
 		if strings.Contains(input, operator) {
 			nums := strings.Split(input, operator)
-			return nums, operator, nil
+			if len(nums) == 2 {
+				return nums, operator, nil
+			} else {
+				return []string{}, "", fmt.Errorf("формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *)")
+			}
+
 		}
 	}
-	return []string{}, "", fmt.Errorf("некорректное выражение")
+	return []string{}, "", fmt.Errorf("неккорректный оператор")
 }
 
 func parseSystemCount(nums []string, operator string) (string, error) {
@@ -85,7 +90,7 @@ func parseSystemCount(nums []string, operator string) (string, error) {
 func parseArabNum(numStr string) (int, error) {
 	num, err := strconv.Atoi(numStr)
 	if err != nil {
-		return 0, fmt.Errorf("некорректное число: %s", numStr)
+		return 0, fmt.Errorf("некорректное число (%s)", numStr)
 	}
 	if num < 1 || num > 10 {
 		return 0, fmt.Errorf("число должно быть от 1 до 10")
@@ -114,9 +119,7 @@ func arabCalc(num1 int, num2 int, operator string) (string, error) {
 	case "*":
 		res = num1 * num2
 	case "/":
-		res = num1 * num2
-	default:
-		return "", fmt.Errorf("неккорректный оператор: %s", operator)
+		res = num1 / num2
 	}
 	return strconv.Itoa(res), nil
 }
@@ -135,9 +138,7 @@ func RomanCalc(num1 int, num2 int, operator string) (string, error) {
 	case "*":
 		res = num1 * num2
 	case "/":
-		res = num1 * num2
-	default:
-		return "", fmt.Errorf("неккорректный оператор: %s", operator)
+		res = num1 / num2
 	}
 	return romans[res-1], nil
 }
