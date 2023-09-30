@@ -43,13 +43,10 @@ func parseInput(input string) ([]string, string, error) {
 			nums := strings.Split(input, operator)
 			if len(nums) == 2 {
 				return nums, operator, nil
-			} else {
-				return []string{}, "", fmt.Errorf("формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *)")
 			}
-
 		}
 	}
-	return []string{}, "", fmt.Errorf("неккорректный оператор")
+	return []string{}, "", fmt.Errorf("формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *)")
 }
 
 func parseSystemCount(nums []string, operator string) (string, error) {
