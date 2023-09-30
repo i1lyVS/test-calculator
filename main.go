@@ -9,7 +9,10 @@ import (
 )
 
 var (
-	romans = []string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"}
+	romans = []string{"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX",
+		"XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII", "XXXIX", "XL", "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L", "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX",
+		"LX", "LXI", "LXII", "LXIII", "LXIV", "LXV", "LXVI", "LXVII", "LXVIII", "LXIX", "LXX", "LXXI", "LXXII", "LXXIII", "LXXIV", "LXXV", "LXXVI", "LXXVII", "LXXVIII", "LXXIX", "LXXX", "LXXXI", "LXXXII", "LXXXIII", "LXXXIV", "LXXXV", "LXXXVI",
+		"LXXXVII", "LXXXVIII", "LXXXIX", "XC", "XCI", "XCII", "XCIII", "XCIV", "XCV", "XCVI", "XCVII", "XCVIII", "XCIX", "C"}
 )
 
 func main() {
@@ -51,7 +54,6 @@ func parseInput(input string) ([]string, string, error) {
 
 func parseSystemCount(nums []string, operator string) (string, error) {
 	var res string
-	var err error
 	var q int
 	for _, num := range nums {
 		for _, roman := range romans {
@@ -77,8 +79,14 @@ func parseSystemCount(nums []string, operator string) (string, error) {
 	case 1:
 		return "", fmt.Errorf("числа должны быть из одной системы счисления")
 	case 2:
-		num1 := parseRomanNum(nums[0])
-		num2 := parseRomanNum(nums[1])
+		num1, err := parseRomanNum(nums[0])
+		if err != nil {
+			return "", err
+		}
+		num2, err := parseRomanNum(nums[1])
+		if err != nil {
+			return "", err
+		}
 		res, err = RomanCalc(num1, num2, operator)
 		if err != nil {
 			return "", err
@@ -99,14 +107,17 @@ func parseArabNum(numStr string) (int, error) {
 	return num, nil
 }
 
-func parseRomanNum(numStr string) int {
+func parseRomanNum(numStr string) (int, error) {
 	var num int
 	for indx, roman := range romans {
 		if strings.Contains(numStr, roman) {
 			num = indx + 1
 		}
 	}
-	return num
+	if num < 1 || num > 10 {
+		return 0, fmt.Errorf("число должно быть от 1 до 10")
+	}
+	return num, nil
 }
 
 func arabCalc(num1 int, num2 int, operator string) (string, error) {
